@@ -387,47 +387,48 @@ function demoData(){
     const c=pick(cats);
     const d=new Date(monthStart.getTime()+Math.floor(rnd(0,(t-monthStart)/DAY+1))*DAY);
     if(d>t) continue;
-    const amt=c[0]==='工资'?rnd(8800,12000):c[0]==='房租'?3800:Math.round(rnd(18,380));
+    const amt=c[0]==='工资'?rnd(7000,8000):c[0]==='房租'?2600:Math.round(rnd(15,260));
     ledger.push({id:uid(),date:ymd(d),cat:c[1],note:c[0],amount:Math.round(amt),type:c[0]==='工资'||c[0]==='基金定投'?'in':'out'});
   }
   // 保证演示月份里有一条工资，不然支出随手一凑就成了负数结余
   if(!ledger.some(x=>x.note==='工资')){
-    ledger.push({id:uid(),date:ymd(new Date(monthStart.getTime()+3*DAY)),cat:'收入',note:'工资',amount:Math.round(rnd(9800,11800)),type:'in'});
+    ledger.push({id:uid(),date:ymd(new Date(monthStart.getTime()+3*DAY)),cat:'收入',note:'工资',amount:Math.round(rnd(7200,7800)),type:'in'});
   }
   ledger.sort((a,b)=>b.date.localeCompare(a.date));
   return {
     assets:[
-      {name:'现金',amount:3260,color:'#FF8C42'},
-      {name:'活钱理财',amount:215200,color:'#F25C05'},
-      {name:'股票',amount:25300,color:'#C49A5F'},
-      {name:'指数基金',amount:14600,color:'#8C7A65'},
-      {name:'应急金',amount:41000,color:'#5B5348'}
+      {name:'现金',amount:6000,color:'#FF8C42'},
+      {name:'活钱理财',amount:48000,color:'#F25C05'},
+      {name:'股票',amount:24000,color:'#C49A5F'},
+      {name:'指数基金',amount:16000,color:'#8C7A65'},
+      {name:'应急金',amount:12000,color:'#5B5348'}
     ],
     holdings:[
-      {id:uid(),code:'601318',name:'中国平安',shares:200,cost:52.4,price:55.8},
-      {id:uid(),code:'510300',name:'沪深300ETF',shares:1200,cost:3.92,price:4.05},
-      {id:uid(),code:'512480',name:'半导体ETF',shares:600,cost:1.08,price:1.02},
-      {id:uid(),code:'600900',name:'长江电力',shares:300,cost:27.6,price:28.9}
+      {id:uid(),code:'510300',name:'沪深300ETF',shares:1000,cost:3.60,price:3.78},
+      {id:uid(),code:'510500',name:'中证500ETF',shares:800,cost:5.40,price:5.56},
+      {id:uid(),code:'510880',name:'红利ETF',shares:600,cost:2.85,price:2.96},
+      {id:uid(),code:'159915',name:'创业板ETF',shares:500,cost:2.05,price:1.98}
     ],
     orders:[
-      {id:uid(),code:'601318',name:'中国平安',trigger:58.6,dir:'止盈',note:'分批减半仓'},
-      {id:uid(),code:'601318',name:'中国平安',trigger:50.2,dir:'止损',note:'跌破就出'},
-      {id:uid(),code:'600900',name:'长江电力',trigger:27.2,dir:'买入',note:'到价挂条件单'}
+      {id:uid(),code:'510300',name:'沪深300ETF',trigger:4.10,dir:'止盈',note:'分批减仓'},
+      {id:uid(),code:'510300',name:'沪深300ETF',trigger:3.40,dir:'止损',note:'跌破减仓'},
+      {id:uid(),code:'510880',name:'红利ETF',trigger:2.75,dir:'买入',note:'到价提醒'}
     ],
     plans:[
-      {id:uid(),name:'红利低波',amount:500,day:20,status:'monthly'},
-      {id:uid(),name:'纳指100',amount:400,day:20,status:'monthly'},
-      {id:uid(),name:'A500',amount:300,day:20,status:'monthly'}
+      {id:uid(),name:'沪深300定投',amount:500,day:10,status:'monthly'},
+      {id:uid(),name:'中证500定投',amount:300,day:10,status:'monthly'},
+      {id:uid(),name:'债券ETF定投',amount:200,day:10,status:'monthly'}
     ],
     ledger,
     todos:[
-      {id:uid(),text:'本周内把体检预约掉',seg:'本周',done:false},
-      {id:uid(),text:'给家里寄一份节日礼盒',seg:'本周',done:false},
-      {id:uid(),text:'读完《刻意练习》第3章',seg:'学习',done:false},
-      {id:uid(),text:'周末补一次腿部训练',seg:'健康',done:false},
-      {id:uid(),text:'把闲置的旧设备挂到二手平台',seg:'日常',done:true},
-      {id:uid(),text:'更新保险续费提醒',seg:'其他',done:false},
-      {id:uid(),text:'整理9月账单',seg:'日常',done:true}
+      {id:uid(),text:'整理本周账单',seg:'日常',done:false},
+      {id:uid(),text:'给绿植浇水',seg:'日常',done:false},
+      {id:uid(),text:'清理下载文件夹',seg:'日常',done:true},
+      {id:uid(),text:'备份手机照片',seg:'其他',done:false},
+      {id:uid(),text:'看一节线上课程',seg:'学习',done:false},
+      {id:uid(),text:'更新软件版本',seg:'其他',done:false},
+      {id:uid(),text:'列下周采购清单',seg:'本周',done:false},
+      {id:uid(),text:'清洗运动水杯',seg:'健康',done:false}
     ],
     habits:habitDates,
     budgets:[
@@ -695,7 +696,7 @@ document.querySelectorAll('[data-add]').forEach(btn=>{
     const kind=btn.dataset.add;
     if(kind==='todo'){
       sheet('添加待办',`
-        <div class="field"><label>要做什么</label><input id="f-text" placeholder="例如：周三前把体检预约掉"></div>
+        <div class="field"><label>要做什么</label><input id="f-text" placeholder="例如：整理本周账单"></div>
         <div class="field"><label>分段</label><select id="f-seg">${['本周','日常','健康','学习','其他'].map(s=>`<option>${s}</option>`).join('')}</select></div>`,
         m=>{
           const text=m.querySelector('#f-text').value.trim();

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="HR科技">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>生活投资工作台 · 演示版</title>
+<meta name="description" content="一个人用的生活与投资工作台：资产分配、持仓条件单、记账、待办与习惯打卡，全部数据保存在本机。">
+<style>
+:root{
+  --bg:#F7F4EE; --bg2:#FFFDF9;
+  --card:#FFFFFF; --line:#EFE7DA; --line2:#E3D8C6;
+  --accent:#EA5C0F; --accent2:#FF8C42; --accent-soft:#FFF0E6;
+  --ink:#2C2925; --ink2:#6F685E; --ink3:#9A9285;
+  --green:#1B8C63; --red:#D14B3D; --gold:#C49A5F;
+  --shadow:0 10px 30px rgba(70,52,26,.07);
+  --shadow-sm:0 3px 10px rgba(70,52,26,.05);
+  --r:20px; --r-sm:13px; --tab:66px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:radial-gradient(1200px 600px at 50% -10%,#FFF8EF 0%,var(--bg) 55%,#F2EEE6 100%);
+  color:var(--ink); font-size:15px; line-height:1.6; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:560px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:calc(var(--tab) + 24px)}
+.view{padding:0 16px}
+[hidden]{display:none!important}
+button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
+input,select{font-family:inherit;border:0;outline:0;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+/* 顶栏 */
+.top{position:sticky;top:0;z-index:9;padding:16px 16px 10px;background:linear-gradient(180deg,rgba(255,251,245,.96),rgba(255,251,245,.82) 70%,rgba(255,251,245,0));backdrop-filter:blur(10px)}
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:9px}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;box-shadow:0 6px 14px rgba(234,92,15,.25)}
+h1{font-size:19px;font-weight:700;letter-spacing:.3px;line-height:1.2}
+.sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.icons{display:flex;gap:6px}
+.icon-btn{width:36px;height:36px;border-radius:11px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);box-shadow:var(--shadow-sm)}
+.icon-btn:active{transform:scale(.96)}
+svg.ic{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* 通用 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:16px}
+.card+.card{margin-top:12px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.card-title .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.hint{font-size:12px;color:var(--ink3)}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:var(--accent-soft);color:#B8430A}
+.pill-gray{background:#F4F1EA;color:var(--ink2)}
+.pill-green{background:#E8F6EF;color:var(--green)}
+.pill-red{background:#FDECEA;color:var(--red)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 18px;border-radius:14px;font-size:14px;font-weight:650;background:var(--ink);color:#fff;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 18px rgba(234,92,15,.22)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line2)}
+.btn-sm{height:34px;padding:0 12px;font-size:12.5px;border-radius:11px}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* 首页 hero */
+.hero{background:linear-gradient(160deg,#2E2A25 0%,#40382F 55%,#4A3B2C 100%);border-radius:24px;padding:20px;color:#fff;position:relative;overflow:hidden;box-shadow:0 18px 36px rgba(46,42,37,.22)}
+.hero:after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,66,.35),transparent 70%)}
+.hero .lab{font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.6px}
+.hero .total{font-size:31px;font-weight:750;letter-spacing:-.5px;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.hero .total small{font-size:14px;font-weight:500;color:rgba(255,255,255,.6);margin-left:4px}
+.hero .delta{font-size:12.5px;color:#FFD2B0}
+.donut-wrap{display:flex;gap:16px;align-items:center;margin-top:16px}
+.donut{width:112px;height:112px;border-radius:50%;flex:none;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.donut:after{content:"";position:absolute;inset:26px;border-radius:50%;background:#423A31;box-shadow:inset 0 2px 8px rgba(0,0,0,.35)}
+.donut .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+.donut .mid b{font-size:13px;font-weight:700}
+.donut .mid span{font-size:10px;color:rgba(255,255,255,.55)}
+.legend{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0}
+.legend .li{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.78)}
+.legend .sw{width:8px;height:8px;border-radius:3px;flex:none}
+.legend .pct{margin-left:auto;font-variant-numeric:tabular-nums;color:#fff;font-weight:600}
+
+/* 统计小格 */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:#FBF8F2;border:1px solid var(--line);border-radius:14px;padding:10px 10px 9px}
+.stat .k{font-size:11px;color:var(--ink3)}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat .v.green{color:var(--green)} .stat .v.red{color:var(--red)}
+
+/* 打卡 */
+.habits{display:flex;gap:9px}
+.habit{flex:1;border:1px solid var(--line);border-radius:15px;padding:11px 8px;text-align:center;background:#FCFAF5;transition:.15s}
+.habit.on{background:var(--accent-soft);border-color:#FFC9A8;box-shadow:0 4px 12px rgba(234,92,15,.1)}
+.habit .e{font-size:18px;line-height:1}
+.habit .t{font-size:11.5px;margin-top:5px;color:var(--ink2);font-weight:600}
+.habit.on .t{color:#B8430A}
+
+/* 列表 */
+.item{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.item:last-child{border-bottom:0}
+.item .main{flex:1;min-width:0}
+.item .t1{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t2{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.item .val{text-align:right;font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:650}
+.check{width:22px;height:22px;border-radius:7px;border:1.6px solid #DCD2C2;display:flex;align-items:center;justify-content:center;flex:none;color:#fff;transition:.15s}
+.check.on{background:var(--accent);border-color:var(--accent)}
+.check svg{width:13px;height:13px}
+
+/* 进度条 */
+.bar{height:7px;border-radius:99px;background:#F1EBE0;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+
+/* 分段 */
+.segs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.segs::-webkit-scrollbar{display:none}
+.seg{flex:none;padding:7px 13px;border-radius:99px;font-size:12.5px;font-weight:600;background:#F4F0E8;color:var(--ink2)}
+.seg.on{background:var(--ink);color:#fff}
+
+/* 表格化持仓 */
+.hold{background:#FCFAF5;border:1px solid var(--line);border-radius:15px;padding:12px;margin-bottom:9px}
+.hold-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.hold .nm{font-size:14.5px;font-weight:700}
+.hold .code{font-size:11px;color:var(--ink3);margin-top:1px;letter-spacing:.4px}
+.hold .pnl{text-align:right}
+.hold .pnl b{font-size:14.5px;font-variant-numeric:tabular-nums}
+.hold .pnl span{display:block;font-size:11px;color:var(--ink3)}
+.hold .bottom{display:flex;gap:12px;margin-top:9px;font-size:11.5px;color:var(--ink3)}
+.hold .bottom b{color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.up{color:var(--red)} .down{color:var(--green)}
+
+/* 底部tab */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;pointer-events:none}
+.tabbar-in{pointer-events:auto;width:100%;max-width:560px;display:flex;background:rgba(255,255,255,.93);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:12px;color:var(--ink3);font-size:11px;font-weight:600}
+.tab.on{color:var(--accent)}
+.tab svg{width:21px;height:21px}
+
+/* 弹层 */
+.mask{position:fixed;inset:0;background:rgba(30,26,20,.42);z-index:30;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.sheet{width:100%;max-width:560px;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto;animation:up .22s cubic-bezier(.22,1,.36,1)}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+.sheet h3{font-size:16px;font-weight:700;margin-bottom:12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--ink3);margin-bottom:5px}
+.field input,.field select{width:100%;height:44px;background:#F8F5EF;border-radius:12px;padding:0 12px;font-size:14px;border:1px solid var(--line)}
+.field input:focus,.field select:focus{border-color:#FFC09B;background:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sheet-actions{display:flex;gap:10px;margin-top:6px}
+.sheet-actions .btn{flex:1}
+.empty{text-align:center;color:var(--ink3);font-size:13px;padding:22px 0}
+.foot{padding:22px 4px 8px;text-align:center;font-size:11.5px;color:var(--ink3);line-height:1.7}
+.toast{position:fixed;left:50%;bottom:calc(var(--tab) + 22px);transform:translate(-50%,10px);background:rgba(44,41,37,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:12px;z-index:40;opacity:0;transition:.22s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:400px){ h1{font-size:17px} .hero .total{font-size:28px} .donut{width:100px;height:100px} }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="top">
+    <div class="top-row">
+      <div class="brand">
+        <span class="logo">生</span>
+        <div>
+          <h1>生活投资工作台</h1>
+          <div class="sub" id="todayLine">演示数据 · 保存在本机</div>
+        </div>
+      </div>
+      <div class="icons">
+        <button class="icon-btn" id="btnInfo" title="使用说明" aria-label="使用说明">
+          <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+        </button>
+        <button class="icon-btn" id="btnReset" title="重置演示数据" aria-label="重置演示数据">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 首页 -->
+  <section class="view" id="v-home">
+    <div class="hero">
+      <div class="lab">资产总额</div>
+      <div class="total" id="totalAssets">0<small>元</small></div>
+      <div class="delta" id="heroDelta">本月结余 —</div>
+      <div class="donut-wrap">
+        <div class="donut" id="donut"><div class="mid"><b id="donutNum">—</b><span>分配</span></div></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>本月收支</div>
+        <span class="pill-gray">演示</span>
+      </div>
+      <div class="grid3">
+        <div class="stat"><div class="k">收入</div><div class="v green num" id="mIncome">0</div></div>
+        <div class="stat"><div class="k">支出</div><div class="v red num" id="mExpense">0</div></div>
+        <div class="stat"><div class="k">结余率</div><div class="v num" id="mRate">0%</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>今日打卡</div>
+        <span class="hint" id="habitHint"></span>
+      </div>
+      <div class="habits" id="habits"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>条件单提醒</div>
+        <button class="btn btn-sm btn-ghost" data-add="order">添加</button>
+      </div>
+      <div id="homeOrders"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>今天要做的</div>
+        <span class="hint" id="todoHint"></span>
+      </div>
+      <div id="homeTodos"></div>
+    </div>
+
+    <div class="foot">数据只存在当前浏览器 · 换设备记得在「我的」里导出</div>
+  </section>
+
+  <!-- 投资 -->
+  <section class="view" id="v-invest" hidden>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>持仓</div>
+        <button class="btn btn-sm btn-ghost" data-add="hold">加一笔</button>
+      </div>
+      <div class="between" style="margin-bottom:12px">
+        <span class="hint">市值合计</span>
+        <b class="num" id="holdValue">0元</b>
+      </div>
+      <div id="holds"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>条件单</div>
+        <button class="btn btn-sm btn-ghost" data-add="order">新增</button>
+      </div>
+      <div class="hint" style="margin-bottom:8px">到价提醒用现价和触发价的距离估算，不联网取价。</div>
+      <div id="orders"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>定投计划</div>
+        <button class="btn btn-sm btn-ghost" data-add="plan">新增</button>
+      </div>
+      <div id="plans"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>账本</div>
+        <button class="btn btn-sm btn-accent" data-add="ledger">记一笔</button>
+      </div>
+      <div id="ledger"></div>
+    </div>
+    <div class="foot">持仓与账本只做记录与复盘，不构成任何投资建议</div>
+  </section>
+
+  <!-- 生活 -->
+  <section class="view" id="v-life" hidden>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>待办清单</div>
+        <button class="btn btn-sm btn-ghost" data-add="todo">添加</button>
+      </div>
+      <div class="segs" id="segs"></div>
+      <div style="margin-top:10px" id="todos"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>14天打卡</div>
+        <span class="pill-green" id="streakPill">连续 0 天</span>
+      </div>
+      <div id="habitGrid" style="display:grid;grid-template-columns:repeat(14,1fr);gap:5px"></div>
+      <div class="hint" style="margin-top:9px">点方格可以补打卡，长按无效，一格代表一天。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>月度预算</div>
+        <span class="hint" id="budgetHint"></span>
+      </div>
+      <div id="budgets"></div>
+    </div>
+    <div class="foot">生活不是项目管理，清单只是把脑子里的东西拿出来放好</div>
+  </section>
+
+  <!-- 我的 -->
+  <section class="view" id="v-me" hidden>
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span class="dot"></span>数据概况</div></div>
+      <div class="grid3">
+        <div class="stat"><div class="k">持仓</div><div class="v num" id="meHolds">0</div></div>
+        <div class="stat"><div class="k">账本</div><div class="v num" id="meLedger">0</div></div>
+        <div class="stat"><div class="k">待办</div><div class="v num" id="meTodos">0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span class="dot"></span>数据管理</div></div>
+      <div class="row" style="gap:9px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="btnExport" style="flex:1">导出JSON</button>
+        <button class="btn btn-ghost" id="btnImport" style="flex:1">导入JSON</button>
+      </div>
+      <div style="margin-top:9px">
+        <button class="btn btn-ghost" id="btnReset2" style="width:100%">重置为演示数据</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json" hidden>
+      <div class="hint" style="margin-top:10px">换电脑或清浏览器前先导出，导入时选择同一个JSON文件即可恢复。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span class="dot"></span>关于这个程序</div></div>
+      <p style="font-size:13.5px;color:var(--ink2);line-height:1.8">
+        一个单文件的工作台：资产分配、持仓与条件单、账本、待办和习惯打卡放在一起，不用装App，双击HTML就能用。
+        所有数据只写在浏览器本地存储里，不上传服务器，清缓存会丢，记得导出备份。
+      </p>
+      <p style="font-size:12px;color:var(--ink3);margin-top:10px">版本 v1.0 · 演示数据 · 作者 HR科技</p>
+      <p style="font-size:12px;color:var(--ink3);margin-top:6px">本程序不联网、不发任何请求、不读取你的账户或文件。演示数据全部随机生成，不含任何真实个人信息。</p>
+    </div>
+    <div class="foot">如果这个模板对你有用，欢迎在CSDN留言，我看到会回</div>
+  </section>
+
+</div>
+
+<div class="tabbar">
+  <div class="tabbar-in">
+    <button class="tab on" data-tab="home">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>首页
+    </button>
+    <button class="tab" data-tab="invest">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16V9M11 16V5M16 16v-4M21 16V7"/></svg>投资
+    </button>
+    <button class="tab" data-tab="life">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h8"/><path d="M18 5l2 2 2-2"/></svg>生活
+    </button>
+    <button class="tab" data-tab="me">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>我的
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 存储与演示数据 ============ */
+const KEY='life_invest_wb_v1';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const DAY=864e5;
+const rnd=(a,b)=>Math.random()*(b-a)+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+function demoData(){
+  const t=new Date();
+  // 近30天打卡随机
+  const habitDates={};
+  for(const k of ['早睡','记账','运动']){
+    const arr=[];
+    for(let i=0;i<30;i++){
+      if(Math.random()< (k==='早睡'?0.62:k==='记账'?0.75:0.45)) arr.push(ymd(new Date(t.getTime()-i*DAY)));
+    }
+    habitDates[k]=arr;
+  }
+  // 本月账本
+  const cats=[['工资','收入'],['买菜','餐饮'],['外卖','餐饮'],['房租','居住'],['地铁','交通'],['健身房','健康'],['电影','娱乐'],['话费','通讯'],['红包','人情'],['咖啡','餐饮'],['日用品','日常'],['基金定投','投资']];
+  const ledger=[];
+  const monthStart=new Date(t.getFullYear(),t.getMonth(),1);
+  for(let i=0;i<14;i++){
+    const c=pick(cats);
+    const d=new Date(monthStart.getTime()+Math.floor(rnd(0,(t-monthStart)/DAY+1))*DAY);
+    if(d>t) continue;
+    const amt=c[0]==='工资'?rnd(8800,12000):c[0]==='房租'?3800:Math.round(rnd(18,380));
+    ledger.push({id:uid(),date:ymd(d),cat:c[1],note:c[0],amount:Math.round(amt),type:c[0]==='工资'||c[0]==='基金定投'?'in':'out'});
+  }
+  // 保证演示月份里有一条工资，不然支出随手一凑就成了负数结余
+  if(!ledger.some(x=>x.note==='工资')){
+    ledger.push({id:uid(),date:ymd(new Date(monthStart.getTime()+3*DAY)),cat:'收入',note:'工资',amount:Math.round(rnd(9800,11800)),type:'in'});
+  }
+  ledger.sort((a,b)=>b.date.localeCompare(a.date));
+  return {
+    assets:[
+      {name:'现金',amount:3260,color:'#FF8C42'},
+      {name:'活钱理财',amount:215200,color:'#F25C05'},
+      {name:'股票',amount:25300,color:'#C49A5F'},
+      {name:'指数基金',amount:14600,color:'#8C7A65'},
+      {name:'应急金',amount:41000,color:'#5B5348'}
+    ],
+    holdings:[
+      {id:uid(),code:'601318',name:'中国平安',shares:200,cost:52.4,price:55.8},
+      {id:uid(),code:'510300',name:'沪深300ETF',shares:1200,cost:3.92,price:4.05},
+      {id:uid(),code:'512480',name:'半导体ETF',shares:600,cost:1.08,price:1.02},
+      {id:uid(),code:'600900',name:'长江电力',shares:300,cost:27.6,price:28.9}
+    ],
+    orders:[
+      {id:uid(),code:'601318',name:'中国平安',trigger:58.6,dir:'止盈',note:'分批减半仓'},
+      {id:uid(),code:'601318',name:'中国平安',trigger:50.2,dir:'止损',note:'跌破就出'},
+      {id:uid(),code:'600900',name:'长江电力',trigger:27.2,dir:'买入',note:'到价挂条件单'}
+    ],
+    plans:[
+      {id:uid(),name:'红利低波',amount:500,day:20,status:'monthly'},
+      {id:uid(),name:'纳指100',amount:400,day:20,status:'monthly'},
+      {id:uid(),name:'A500',amount:300,day:20,status:'monthly'}
+    ],
+    ledger,
+    todos:[
+      {id:uid(),text:'本周内把体检预约掉',seg:'本周',done:false},
+      {id:uid(),text:'给家里寄一份节日礼盒',seg:'本周',done:false},
+      {id:uid(),text:'读完《刻意练习》第3章',seg:'学习',done:false},
+      {id:uid(),text:'周末补一次腿部训练',seg:'健康',done:false},
+      {id:uid(),text:'把闲置的旧设备挂到二手平台',seg:'日常',done:true},
+      {id:uid(),text:'更新保险续费提醒',seg:'其他',done:false},
+      {id:uid(),text:'整理9月账单',seg:'日常',done:true}
+    ],
+    habits:habitDates,
+    budgets:[
+      {cat:'餐饮',limit:1500},{cat:'交通',limit:400},{cat:'娱乐',limit:500},{cat:'购物',limit:800}
+    ]
+  };
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){const d=JSON.parse(raw); if(d&&d.assets) return d;}
+  }catch(e){}
+  const d=demoData(); save(d); return d;
+}
+let D=load();
+function save(d){ try{localStorage.setItem(KEY,JSON.stringify(d||D));}catch(e){} }
+
+const money=n=>Math.round(n).toLocaleString('zh-CN');
+const fx=n=>n.toFixed(2);
+
+/* ============ 渲染：首页 ============ */
+function renderHome(){
+  const d=new Date();
+  const wk='日一二三四五六'[d.getDay()];
+  document.getElementById('todayLine').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 周${wk} · 演示数据`;
+  const total=D.assets.reduce((s,a)=>s+a.amount,0);
+  document.getElementById('totalAssets').innerHTML=money(total)+'<small>元</small>';
+  // 本月收支
+  const ym=today().slice(0,7);
+  let inc=0,exp=0;
+  D.ledger.filter(x=>x.date.slice(0,7)===ym).forEach(x=>{ if(x.type==='in') inc+=x.amount; else exp+=x.amount; });
+  document.getElementById('mIncome').textContent=money(inc);
+  document.getElementById('mExpense').textContent=money(exp);
+  const rate=inc>0?Math.round((inc-exp)/inc*100):0;
+  document.getElementById('mRate').textContent=rate+'%';
+  document.getElementById('heroDelta').textContent=`本月结余 ${money(inc-exp)} 元 · 结余率 ${rate}%`;
+  // 环形
+  const colors=D.assets.map(a=>a.color);
+  let acc=0; const stops=[];
+  D.assets.forEach((a,i)=>{
+    const p=a.amount/total*100;
+    stops.push(`${a.color} ${acc.toFixed(2)}% ${(acc+p).toFixed(2)}%`);
+    acc+=p;
+  });
+  const donut=document.getElementById('donut');
+  donut.style.background=`conic-gradient(${stops.join(',')})`;
+  document.getElementById('donutNum').textContent=(D.assets.length)+'项';
+  document.getElementById('legend').innerHTML=D.assets.map(a=>{
+    const p=(a.amount/total*100).toFixed(1);
+    return `<div class="li"><span class="sw" style="background:${a.color}"></span>${a.name}<span class="pct">${p}%</span></div>`;
+  }).join('');
+
+  // 打卡
+  const t=today();
+  document.getElementById('habits').innerHTML=['早睡','记账','运动'].map(k=>{
+    const on=(D.habits[k]||[]).includes(t);
+    const e=k==='早睡'?'🌙':k==='记账'?'🧾':'🏃';
+    return `<button class="habit ${on?'on':''}" data-habit="${k}"><div class="e">${e}</div><div class="t">${k}</div></button>`;
+  }).join('');
+  const onCnt=['早睡','记账','运动'].filter(k=>(D.habits[k]||[]).includes(t)).length;
+  document.getElementById('habitHint').textContent=`${onCnt}/3 已完成`;
+
+  // 条件单
+  document.getElementById('homeOrders').innerHTML=D.orders.length?D.orders.map(o=>{
+    const h=D.holdings.find(x=>x.code===o.code);
+    const price=h?h.price:null;
+    const dist=price?((o.trigger-price)/price*100):null;
+    const cls=dist==null?'':(dist>0?'up':'down');
+    return `<div class="item">
+      <div class="main"><div class="t1">${o.name} <span class="pill ${o.dir==='止盈'?'pill-green':o.dir==='止损'?'pill-red':''}">${o.dir}</span></div>
+      <div class="t2">触发 ${fx(o.trigger)} · ${o.note||'—'}</div></div>
+      <div class="val ${cls}">${price?fx(price):'—'}<div class="hint" style="font-weight:400">${dist==null?'无持仓':(dist>0?'距触发 +':'距触发 ')+dist.toFixed(1)+'%'}</div></div>
+    </div>`;
+  }).join(''):'<div class="empty">还没有条件单</div>';
+
+  // 今日待办（取未完成的3条）
+  const open=D.todos.filter(x=>!x.done).slice(0,3);
+  document.getElementById('todoHint').textContent=`未完成 ${D.todos.filter(x=>!x.done).length} 条`;
+  document.getElementById('homeTodos').innerHTML=open.length?open.map(x=>`
+    <div class="item">
+      <button class="check" data-todo="${x.id}"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.4" fill="none"/></svg></button>
+      <div class="main"><div class="t1" style="font-weight:500">${x.text}</div><div class="t2">${x.seg}</div></div>
+    </div>`).join(''):'<div class="empty">今天的都做完了</div>';
+}
+
+/* ============ 投资 ============ */
+function renderInvest(){
+  const hv=D.holdings.reduce((s,h)=>s+h.shares*h.price,0);
+  document.getElementById('holdValue').textContent=money(hv)+'元';
+  document.getElementById('holds').innerHTML=D.holdings.length?D.holdings.map(h=>{
+    const mv=h.shares*h.price, cost=h.shares*h.cost;
+    const pnl=mv-cost, pct=cost?pnl/cost*100:0;
+    const totalAll=D.holdings.reduce((s,x)=>s+x.shares*x.price,0);
+    const w=totalAll?mv/totalAll*100:0;
+    return `<div class="hold">
+      <div class="hold-top">
+        <div><div class="nm">${h.name}</div><div class="code">${h.code}</div></div>
+        <div class="pnl"><b class="${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${money(pnl)}</b><span class="${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${pct.toFixed(2)}%</span></div>
+      </div>
+      <div class="bottom">
+        <span>股数 <b>${h.shares}</b></span>
+        <span>成本 <b>${fx(h.cost)}</b></span>
+        <span>现价 <b>${fx(h.price)}</b></span>
+        <span>市值 <b>${money(mv)}</b></span>
+      </div>
+      <div class="bar" style="margin-top:9px"><i style="width:${Math.min(w,100)}%"></i></div>
+      <div class="row" style="justify-content:flex-end;margin-top:4px">
+        <button class="hint" data-edit-hold="${h.id}" style="color:var(--ink3);font-size:11.5px">改现价</button>
+        <button class="hint" data-del-hold="${h.id}" style="color:#C98A83;font-size:11.5px">删除</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">还没有持仓记录</div>';
+
+  document.getElementById('orders').innerHTML=D.orders.length?D.orders.map(o=>{
+    const h=D.holdings.find(x=>x.code===o.code);
+    const price=h?h.price:0;
+    const dist=price?Math.abs(o.trigger-price)/price*100:0;
+    const near=dist<3;
+    return `<div class="item">
+      <div class="main">
+        <div class="t1">${o.name} <span class="code" style="font-weight:400">${o.code}</span></div>
+        <div class="t2">${o.dir} ${fx(o.trigger)} ${o.note?'· '+o.note:''}</div>
+        <div class="bar" style="margin-top:7px"><i style="width:${Math.max(4,100-Math.min(dist,100))}%;${near?'background:#D14B3D':''}"></i></div>
+      </div>
+      <div class="val"><span class="pill ${near?'pill-red':'pill-gray'}">${price?('差 '+dist.toFixed(1)+'%'):'无持仓'}</span>
+        <button class="hint" data-del-order="${o.id}" style="display:block;margin-top:6px;color:#C98A83">删除</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">还没有条件单</div>';
+
+  document.getElementById('plans').innerHTML=D.plans.length?D.plans.map(p=>`
+    <div class="item">
+      <div class="main"><div class="t1">${p.name}</div><div class="t2">每月 ${p.day} 日 · 红利再投</div></div>
+      <div class="val">${money(p.amount)}元<div class="hint" style="font-weight:400">月定投</div></div>
+    </div>`).join(''):'<div class="empty">还没有定投计划</div>';
+
+  document.getElementById('ledger').innerHTML=D.ledger.length?D.ledger.slice(0,12).map(x=>`
+    <div class="item">
+      <div class="main"><div class="t1" style="font-weight:500">${x.note}</div><div class="t2">${x.date} · ${x.cat}</div></div>
+      <div class="val ${x.type==='in'?'up':'down'}">${x.type==='in'?'+':'-'}${money(x.amount)}</div>
+    </div>`).join(''):'<div class="empty">账本还是空的</div>';
+}
+
+/* ============ 生活 ============ */
+let segNow='全部';
+const SEGS=['全部','本周','日常','健康','学习','其他'];
+function renderLife(){
+  document.getElementById('segs').innerHTML=SEGS.map(s=>`<button class="seg ${s===segNow?'on':''}" data-seg="${s}">${s}</button>`).join('');
+  const list=D.todos.filter(x=>segNow==='全部'||x.seg===segNow);
+  document.getElementById('todos').innerHTML=list.length?list.map(x=>`
+    <div class="item">
+      <button class="check ${x.done?'on':''}" data-todo="${x.id}"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.4" fill="none"/></svg></button>
+      <div class="main"><div class="t1" style="font-weight:${x.done?400:600};${x.done?'color:var(--ink3);text-decoration:line-through':''}">${x.text}</div><div class="t2">${x.seg}</div></div>
+      <button class="hint" data-del-todo="${x.id}" style="color:#C98A83">删</button>
+    </div>`).join(''):'<div class="empty">这个分段是空的</div>';
+
+  // 14天格子
+  const dates=[]; for(let i=13;i>=0;i--) dates.push(ymd(new Date(Date.now()-i*DAY)));
+  const any=(d)=>['早睡','记账','运动'].some(k=>(D.habits[k]||[]).includes(d));
+  document.getElementById('habitGrid').innerHTML=dates.map(d=>{
+    const on=any(d);
+    const n=d.slice(8);
+    return `<div title="${d}" style="aspect-ratio:1;border-radius:7px;background:${on?'linear-gradient(135deg,#FFB27A,#EA5C0F)':'#F1EBE0'};display:flex;align-items:center;justify-content:center;font-size:9.5px;color:${on?'#fff':'#B6AC9C'};font-weight:600">${n}</div>`;
+  }).join('');
+  // 连续天数
+  let streak=0;
+  for(let i=0;i<60;i++){ const d=ymd(new Date(Date.now()-i*DAY)); if(any(d)) streak++; else break; }
+  document.getElementById('streakPill').textContent='连续 '+streak+' 天';
+
+  // 预算
+  const ym=today().slice(0,7);
+  document.getElementById('budgets').innerHTML=D.budgets.map(b=>{
+    const used=D.ledger.filter(x=>x.date.slice(0,7)===ym&&x.cat===b.cat&&x.type==='out').reduce((s,x)=>s+x.amount,0);
+    const p=Math.min(used/b.limit*100,100);
+    const over=used>b.limit;
+    return `<div style="margin-bottom:12px">
+      <div class="between" style="margin-bottom:5px;font-size:13px">
+        <span style="font-weight:600">${b.cat}</span>
+        <span style="color:${over?'var(--red)':'var(--ink2)'};font-variant-numeric:tabular-nums">${money(used)} / ${money(b.limit)}</span>
+      </div>
+      <div class="bar"><i style="width:${p}%;${over?'background:#D14B3D':''}"></i></div>
+    </div>`;
+  }).join('');
+  document.getElementById('budgetHint').textContent=ym;
+}
+
+/* ============ 我的 ============ */
+function renderMe(){
+  document.getElementById('meHolds').textContent=D.holdings.length;
+  document.getElementById('meLedger').textContent=D.ledger.length;
+  document.getElementById('meTodos').textContent=D.todos.filter(x=>!x.done).length;
+}
+
+function renderAll(){ renderHome(); renderInvest(); renderLife(); renderMe(); save(); }
+
+/* ============ 交互 ============ */
+const toastEl=document.getElementById('toast');
+let toastTimer=0;
+function toast(msg){
+  toastEl.textContent=msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800);
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]');
+  if(t){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+    const v=t.dataset.tab;
+    ['home','invest','life','me'].forEach(k=>document.getElementById('v-'+k).hidden=(k!==v));
+    window.scrollTo({top:0});
+    return;
+  }
+  const h=e.target.closest('[data-habit]');
+  if(h){
+    const k=h.dataset.habit, d=today();
+    const arr=D.habits[k]||(D.habits[k]=[]);
+    const i=arr.indexOf(d);
+    if(i>=0) arr.splice(i,1); else arr.push(d);
+    renderAll(); return;
+  }
+  const td=e.target.closest('[data-todo]');
+  if(td){
+    const x=D.todos.find(y=>y.id===td.dataset.todo);
+    if(x){x.done=!x.done; renderAll();}
+    return;
+  }
+  const dt=e.target.closest('[data-del-todo]');
+  if(dt){ D.todos=D.todos.filter(x=>x.id!==dt.dataset.delTodo); renderAll(); return; }
+  const dh=e.target.closest('[data-del-hold]');
+  if(dh){ D.holdings=D.holdings.filter(x=>x.id!==dh.dataset.delHold); renderAll(); return; }
+  const dord=e.target.closest('[data-del-order]');
+  if(dord){ D.orders=D.orders.filter(x=>x.id!==dord.dataset.delOrder); renderAll(); return; }
+  const eh=e.target.closest('[data-edit-hold]');
+  if(eh){
+    const h=D.holdings.find(x=>x.id===eh.dataset.editHold);
+    const v=prompt('输入最新价（元）',fx(h.price));
+    if(v!=null&&!isNaN(parseFloat(v))){ h.price=parseFloat(v); renderAll(); toast('已更新现价'); }
+    return;
+  }
+  const sg=e.target.closest('[data-seg]');
+  if(sg){ segNow=sg.dataset.seg; renderLife(); return; }
+});
+
+/* 弹层通用 */
+function sheet(title,bodyHTML,onOk,okText){
+  const mask=document.createElement('div');
+  mask.className='mask';
+  mask.innerHTML=`<div class="sheet"><h3>${title}</h3><div class="sheet-body">${bodyHTML}</div>
+    <div class="sheet-actions"><button class="btn btn-ghost" data-cancel>取消</button>
+    <button class="btn btn-accent" data-ok>${okText||'保存'}</button></div></div>`;
+  document.body.appendChild(mask);
+  const close=()=>mask.remove();
+  mask.addEventListener('click',ev=>{
+    if(ev.target===mask||ev.target.closest('[data-cancel]')) close();
+    if(ev.target.closest('[data-ok]')){
+      const r=onOk(mask);
+      if(r!==false) close();
+    }
+  });
+  return mask;
+}
+
+document.querySelectorAll('[data-add]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const kind=btn.dataset.add;
+    if(kind==='todo'){
+      sheet('添加待办',`
+        <div class="field"><label>要做什么</label><input id="f-text" placeholder="例如：周三前把体检预约掉"></div>
+        <div class="field"><label>分段</label><select id="f-seg">${['本周','日常','健康','学习','其他'].map(s=>`<option>${s}</option>`).join('')}</select></div>`,
+        m=>{
+          const text=m.querySelector('#f-text').value.trim();
+          if(!text){toast('先写点内容');return false;}
+          D.todos.unshift({id:uid(),text,seg:m.querySelector('#f-seg').value,done:false});
+          renderAll(); toast('已添加');
+        });
+    }
+    if(kind==='hold'){
+      sheet('添加持仓',`
+        <div class="two">
+          <div class="field"><label>名称</label><input id="f-name" placeholder="长江电力"></div>
+          <div class="field"><label>代码</label><input id="f-code" placeholder="600900"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>股数</label><input id="f-sh" type="number" placeholder="300"></div>
+          <div class="field"><label>成本价</label><input id="f-cost" type="number" step="0.01" placeholder="27.60"></div>
+        </div>
+        <div class="field"><label>现价</label><input id="f-price" type="number" step="0.01" placeholder="28.90"></div>`,
+        m=>{
+          const name=m.querySelector('#f-name').value.trim();
+          const sh=parseFloat(m.querySelector('#f-sh').value), cost=parseFloat(m.querySelector('#f-cost').value), price=parseFloat(m.querySelector('#f-price').value);
+          if(!name||!(sh>0)||!(cost>0)||!(price>0)){toast('名称和数字都要填');return false;}
+          D.holdings.push({id:uid(),name,code:m.querySelector('#f-code').value.trim()||'—',shares:sh,cost,price});
+          renderAll(); toast('已添加持仓');
+        });
+    }
+    if(kind==='order'){
+      sheet('添加条件单',`
+        <div class="field"><label>名称</label><input id="f-name" placeholder="长江电力"></div>
+        <div class="two">
+          <div class="field"><label>代码</label><input id="f-code" placeholder="600900"></div>
+          <div class="field"><label>触发价</label><input id="f-trig" type="number" step="0.01" placeholder="30.50"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>方向</label><select id="f-dir"><option>止盈</option><option>止损</option><option>买入</option></select></div>
+          <div class="field"><label>备注</label><input id="f-note" placeholder="分批减半仓"></div>
+        </div>`,
+        m=>{
+          const name=m.querySelector('#f-name').value.trim();
+          const trig=parseFloat(m.querySelector('#f-trig').value);
+          if(!name||!(trig>0)){toast('名称和触发价都要填');return false;}
+          D.orders.push({id:uid(),name,code:m.querySelector('#f-code').value.trim()||'—',trigger:trig,dir:m.querySelector('#f-dir').value,note:m.querySelector('#f-note').value.trim()});
+          renderAll(); toast('已添加条件单');
+        });
+    }
+    if(kind==='plan'){
+      sheet('添加定投',`
+        <div class="field"><label>标的</label><input id="f-name" placeholder="红利低波"></div>
+        <div class="two">
+          <div class="field"><label>每月金额</label><input id="f-amt" type="number" placeholder="500"></div>
+          <div class="field"><label>扣款日</label><input id="f-day" type="number" min="1" max="28" placeholder="20"></div>
+        </div>`,
+        m=>{
+          const name=m.querySelector('#f-name').value.trim();
+          const amt=parseFloat(m.querySelector('#f-amt').value);
+          if(!name||!(amt>0)){toast('名称和金额都要填');return false;}
+          D.plans.push({id:uid(),name,amount:amt,day:parseInt(m.querySelector('#f-day').value)||20,status:'monthly'});
+          renderAll(); toast('已添加定投');
+        });
+    }
+    if(kind==='ledger'){
+      sheet('记一笔',`
+        <div class="two">
+          <div class="field"><label>类型</label><select id="f-type"><option value="out">支出</option><option value="in">收入</option></select></div>
+          <div class="field"><label>金额</label><input id="f-amt" type="number" placeholder="38"></div>
+        </div>
+        <div class="field"><label>说明</label><input id="f-note" placeholder="午饭 沙县拌面"></div>
+        <div class="two">
+          <div class="field"><label>分类</label><select id="f-cat">${['餐饮','交通','居住','日常','健康','娱乐','通讯','人情','投资','其他'].map(c=>`<option>${c}</option>`).join('')}</select></div>
+          <div class="field"><label>日期</label><input id="f-date" type="date" value="${today()}"></div>
+        </div>`,
+        m=>{
+          const amt=parseFloat(m.querySelector('#f-amt').value);
+          if(!(amt>0)){toast('金额要大于0');return false;}
+          D.ledger.unshift({id:uid(),date:m.querySelector('#f-date').value||today(),cat:m.querySelector('#f-cat').value,note:m.querySelector('#f-note').value.trim()||'未命名',amount:Math.round(amt),type:m.querySelector('#f-type').value});
+          D.ledger.sort((a,b)=>b.date.localeCompare(a.date));
+          renderAll(); toast('已记一笔');
+        });
+    }
+  });
+});
+
+/* 说明 */
+document.getElementById('btnInfo').addEventListener('click',()=>{
+  sheet('使用说明',`
+    <div style="font-size:13.5px;line-height:1.85;color:var(--ink2)">
+      <p><b>1. 四个页面</b>：首页看资产和今天，投资记持仓/条件单/定投/账本，生活管待办和打卡，我的做数据备份。</p>
+      <p style="margin-top:8px"><b>2. 演示数据</b>：第一次打开会随机生成一套演示数据，右上角按钮或「我的」里可以重置。</p>
+      <p style="margin-top:8px"><b>3. 改成你自己的</b>：直接删掉演示条目再添加即可，或先重置再逐条录入。</p>
+      <p style="margin-top:8px"><b>4. 数据在哪</b>：只在浏览器 localStorage，换设备/清缓存会丢，用「导出JSON」备份。</p>
+      <p style="margin-top:8px"><b>5. 价格</b>：现价需要手动改，程序不联网，条件单距离只是估算。</p>
+    </div>`,()=>{},'知道了');
+});
+
+function resetDemo(){
+  if(!confirm('重置会用一套新的随机演示数据覆盖当前内容，先导出备份了吗？')) return;
+  D=demoData(); save(); renderAll(); toast('已重置演示数据');
+}
+document.getElementById('btnReset').addEventListener('click',resetDemo);
+document.getElementById('btnReset2').addEventListener('click',resetDemo);
+
+/* 导出导入 */
+document.getElementById('btnExport').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='生活投资工作台-数据-'+today()+'.json';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast('已导出JSON');
+});
+document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||!d.assets||!d.todos) throw 0;
+      D=d; save(); renderAll(); toast('导入成功');
+    }catch(e){ toast('这个文件读不出来'); }
+  };
+  r.readAsText(f);
+  ev.target.value='';
+});
+
+renderAll();
+</script>
+</body>
+</html>

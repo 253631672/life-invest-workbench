@@ -1,5 +1,7 @@
 # 生活投资工作台
 
+[![在线预览](https://img.shields.io/badge/在线预览-打开-E8590C)](https://253631672.github.io/life-invest-workbench/) [![单文件](https://img.shields.io/badge/单文件-HTML-2B2B2B)](life-invest-workbench.html) [![离线可用](https://img.shields.io/badge/离线-可用-4C8C4A)](#) [![License](https://img.shields.io/badge/license-MIT-8A6A3B)](LICENSE)
+
 把资产分配、持仓、账本、待办和打卡放在同一屏。
 
 单文件 HTML，双击就能用，不需要安装、注册或联网。数据只写在自己的浏览器里，不上传任何服务器。
@@ -19,6 +21,7 @@
 
 ## 怎么用
 
+0. 在线预览：https://253631672.github.io/life-invest-workbench/ ，不用下载，浏览器直接打开
 1. 下载 `life-invest-workbench.html`
 2. 电脑上双击，用浏览器打开
 3. 手机上把文件传过去，用浏览器打开同一个文件
@@ -43,6 +46,8 @@ life-invest-workbench.html   程序本体，44KB
 screenshots/                 三张界面截图
 LICENSE
 ```
+
+如果这个工具帮你省了点时间，点个 Star 支持一下，也方便后面找到它。
 
 ## 许可
 
